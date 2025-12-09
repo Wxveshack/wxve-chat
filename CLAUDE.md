@@ -47,35 +47,23 @@ data: {"type": "done"}
 
 **Key Dependencies:**
 - `leptos` - Reactive UI framework
-- `gloo-net` - Fetch/SSE for WASM
-- `serde` / `serde_json` - Serialization (shared types with backend)
-- `web-sys` - Web API bindings (localStorage, etc.)
+- `serde` / `serde_json` - Serialization
+- `web-sys` - Web API bindings (fetch, streams)
+- `wasm-bindgen` / `wasm-bindgen-futures` - JS interop and async
 
 ## Project Structure
 
 ```
 wxve-chat/
 ├── Cargo.toml
-├── Trunk.toml
 ├── index.html
 ├── src/
-│   ├── main.rs          # App entry, mount root component
-│   ├── app.rs           # Root <App/> component
-│   ├── components/
-│   │   ├── mod.rs
-│   │   ├── chat.rs      # Chat container
-│   │   ├── message.rs   # Individual message bubble
-│   │   └── input.rs     # Message input box
-│   ├── api/
-│   │   ├── mod.rs
-│   │   ├── types.rs     # ChatRequest, StreamChunk enum
-│   │   └── client.rs    # SSE streaming client
-│   └── state/
-│       ├── mod.rs
-│       └── conversation.rs  # Conversation history, localStorage
+│   └── main.rs    # Everything: types, SSE client, UI, main()
 └── styles/
-    └── main.css
+    └── main.css   # (future)
 ```
+
+Single file until complexity demands otherwise.
 
 ## Commands
 
