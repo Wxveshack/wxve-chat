@@ -17,6 +17,9 @@ trunk build --release
 
 # Lint
 cargo clippy --target wasm32-unknown-unknown
+
+# Deploy to AWS (from cdk/ directory)
+cd cdk && npm install && npm run deploy
 ```
 
 ## API Contract

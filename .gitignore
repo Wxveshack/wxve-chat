@@ -1,3 +1,10 @@
 /target
 /dist
 Cargo.lock
+
+# CDK
+cdk/node_modules
+cdk/dist
+cdk/cdk.out
+cdk/*.js
+cdk/*.d.ts
