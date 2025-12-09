@@ -216,9 +216,13 @@ fn App() -> impl IntoView {
 
     let messages_container = create_node_ref::<html::Div>();
 
+    let has_messages = move || !messages.get().is_empty() || !current_response.get().is_empty();
+
     view! {
-        <div>
-            <div node_ref=messages_container>
+        <div class=move || if has_messages() { "container has-messages" } else { "container empty" }>
+            <div class="logo">"wxve.io"</div>
+
+            <div class="messages" node_ref=messages_container>
                 <For
                     each=move || messages.get()
                     key=|msg| msg.id
@@ -228,7 +232,7 @@ fn App() -> impl IntoView {
                             Role::Assistant => "assistant",
                         };
                         view! {
-                            <div>
+                            <div class="message">
                                 <strong>{role_str}": "</strong>
                                 {msg.content}
                             </div>
@@ -240,7 +244,7 @@ fn App() -> impl IntoView {
                     let response = current_response.get();
                     if !response.is_empty() {
                         Some(view! {
-                            <div>
+                            <div class="message">
                                 <strong>"assistant: "</strong>
                                 {response}
                             </div>
@@ -251,23 +255,25 @@ fn App() -> impl IntoView {
                 }}
             </div>
 
-            <div>
-                <input
-                    type="text"
-                    placeholder="Ask Xve..."
-                    prop:value=move || input.get()
-                    on:input=move |ev| {
-                        set_input.set(leptos::event_target_value(&ev));
-                    }
-                    on:keypress=move |ev| {
-                        if ev.key() == "Enter" {
-                            do_send();
+            <div class="input-area">
+                <div class="input-box">
+                    <input
+                        type="text"
+                        placeholder="Ask Xve..."
+                        prop:value=move || input.get()
+                        on:input=move |ev| {
+                            set_input.set(leptos::event_target_value(&ev));
                         }
-                    }
-                />
-                <button on:click=move |_| do_send() prop:disabled=move || loading.get()>
-                    "Send"
-                </button>
+                        on:keypress=move |ev| {
+                            if ev.key() == "Enter" {
+                                do_send();
+                            }
+                        }
+                    />
+                    <button on:click=move |_| do_send() prop:disabled=move || loading.get()>
+                        "Send"
+                    </button>
+                </div>
             </div>
         </div>
     }
