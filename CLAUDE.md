@@ -1,8 +1,23 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project
 
 Open-source chat interface for Xve (chat.wxve.io), the analytical voice of Wxve.
+
+## Commands
+
+```bash
+# Dev server with hot reload
+trunk serve
+
+# Production build (output in dist/)
+trunk build --release
+
+# Lint
+cargo clippy --target wasm32-unknown-unknown
+```
 
 ## API Contract
 
@@ -37,51 +52,16 @@ data: {"type": "done"}
 - `done` - Response complete
 - `error` - Something went wrong
 
-## Stack
+## Architecture
 
-**Framework:** Leptos (Rust → WASM)
+Single-file Leptos app (`src/main.rs`) with three sections:
+1. **Types** - `ChatRequest`, `Message`, `StreamChunk` (serde-tagged enum matching API)
+2. **SSE Client** - `send_message()` async fn using web-sys fetch + ReadableStream
+3. **UI Component** - `App` component with signals for messages, input, loading state
 
-**Build:** Trunk (WASM bundler)
+Compiles to WASM via Trunk. Deployed as static files to S3 + CloudFront.
 
-**Deployment:** Static WASM + HTML/CSS/JS to S3 + CloudFront at chat.wxve.io
+## Code Style
 
-**Key Dependencies:**
-- `leptos` - Reactive UI framework
-- `serde` / `serde_json` - Serialization
-- `web-sys` - Web API bindings (fetch, streams)
-- `wasm-bindgen` / `wasm-bindgen-futures` - JS interop and async
-
-## Project Structure
-
-```
-wxve-chat/
-├── Cargo.toml
-├── index.html
-├── src/
-│   └── main.rs    # Everything: types, SSE client, UI, main()
-└── styles/
-    └── main.css   # (future)
-```
-
-Single file until complexity demands otherwise.
-
-## Commands
-
-```bash
-# Dev server with hot reload
-trunk serve
-
-# Production build
-trunk build --release
-
-# Output in dist/ → deploy to S3
-```
-
-## Design
-
-Minimal, fast, accessible. Xve speaks - the UI should stay out of the way.
-
-## Future Considerations
-
-- **Download conversation:** Serialize history to JSON/Markdown via web-sys Blob API
-- **Visualizations:** Canvas/WebGL bindings in Rust, or integrate with charting libs via JS interop
+- Use explicit imports (no `use leptos::*`)
+- Keep everything in `main.rs` until complexity demands otherwise

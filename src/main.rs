@@ -1,6 +1,6 @@
 use leptos::{
-    component, create_signal, view, IntoView, SignalGet, SignalSet, SignalUpdate,
-    spawn_local, mount_to_body,
+    component, create_node_ref, create_signal, html, view, For, IntoView, SignalGet,
+    SignalSet, SignalUpdate, spawn_local, mount_to_body,
 };
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsCast;
@@ -11,16 +11,25 @@ use web_sys::{Request, RequestInit, RequestMode, Response};
 // Types - matches API contract
 // ----------------------------------------------------------------------------
 
-#[derive(Clone, Serialize)]
-struct ChatRequest {
-    message: String,
-    history: Vec<Message>,
+#[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum Role {
+    User,
+    Assistant,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 struct Message {
-    role: String,
+    #[serde(skip)]
+    id: usize,
+    role: Role,
     content: String,
+}
+
+#[derive(Clone, Serialize)]
+struct ChatRequest {
+    message: String,
+    history: Vec<Message>,
 }
 
 #[derive(Deserialize)]
@@ -130,6 +139,7 @@ fn App() -> impl IntoView {
     let (input, set_input) = create_signal(String::new());
     let (loading, set_loading) = create_signal(false);
     let (current_response, set_current_response) = create_signal(String::new());
+    let (next_id, set_next_id) = create_signal(0usize);
 
     let do_send = move || {
         let msg = input.get();
@@ -142,9 +152,12 @@ fn App() -> impl IntoView {
         set_current_response.set(String::new());
 
         // Add user message to history
+        let id = next_id.get();
+        set_next_id.set(id + 1);
         set_messages.update(|msgs| {
             msgs.push(Message {
-                role: "user".to_string(),
+                id,
+                role: Role::User,
                 content: msg.clone(),
             });
         });
@@ -158,9 +171,12 @@ fn App() -> impl IntoView {
                 }
                 StreamChunk::Done => {
                     let response = current_response.get();
+                    let id = next_id.get();
+                    set_next_id.set(id + 1);
                     set_messages.update(|msgs| {
                         msgs.push(Message {
-                            role: "assistant".to_string(),
+                            id,
+                            role: Role::Assistant,
                             content: response,
                         });
                     });
@@ -168,9 +184,12 @@ fn App() -> impl IntoView {
                     set_loading.set(false);
                 }
                 StreamChunk::Error { message } => {
+                    let id = next_id.get();
+                    set_next_id.set(id + 1);
                     set_messages.update(|msgs| {
                         msgs.push(Message {
-                            role: "assistant".to_string(),
+                            id,
+                            role: Role::Assistant,
                             content: format!("Error: {message}"),
                         });
                     });
@@ -181,9 +200,12 @@ fn App() -> impl IntoView {
             .await;
 
             if let Err(e) = result {
+                let id = next_id.get();
+                set_next_id.set(id + 1);
                 set_messages.update(|msgs| {
                     msgs.push(Message {
-                        role: "assistant".to_string(),
+                        id,
+                        role: Role::Assistant,
                         content: format!("Error: {e}"),
                     });
                 });
@@ -192,19 +214,27 @@ fn App() -> impl IntoView {
         });
     };
 
+    let messages_container = create_node_ref::<html::Div>();
+
     view! {
         <div>
-            <div>
-                {move || messages.get().iter().map(|msg| {
-                    let role = msg.role.clone();
-                    let content = msg.content.clone();
-                    view! {
-                        <div>
-                            <strong>{role}": "</strong>
-                            {content}
-                        </div>
+            <div node_ref=messages_container>
+                <For
+                    each=move || messages.get()
+                    key=|msg| msg.id
+                    children=move |msg| {
+                        let role_str = match msg.role {
+                            Role::User => "user",
+                            Role::Assistant => "assistant",
+                        };
+                        view! {
+                            <div>
+                                <strong>{role_str}": "</strong>
+                                {msg.content}
+                            </div>
+                        }
                     }
-                }).collect::<Vec<_>>()}
+                />
 
                 {move || {
                     let response = current_response.get();
