@@ -245,17 +245,16 @@ fn App() -> impl IntoView {
                     each=move || messages.get()
                     key=|msg| msg.id
                     children=move |msg| {
-                        let role_str = match msg.role {
-                            Role::User => "user",
-                            Role::Assistant => "assistant",
+                        let class = match msg.role {
+                            Role::User => "message user",
+                            Role::Assistant => "message",
                         };
                         let content_html = match msg.role {
                             Role::User => msg.content.clone(),
                             Role::Assistant => markdown_to_html(&msg.content),
                         };
                         view! {
-                            <div class="message">
-                                <strong>{role_str}": "</strong>
+                            <div class=class>
                                 <span inner_html=content_html></span>
                             </div>
                         }
@@ -269,7 +268,6 @@ fn App() -> impl IntoView {
                         let html = markdown_to_html(&response);
                         Some(view! {
                             <div class="message">
-                                <strong>"assistant: "</strong>
                                 <span inner_html=html></span>
                                 {move || tool_running.get().map(|name| view! {
                                     <div class="tool-indicator">

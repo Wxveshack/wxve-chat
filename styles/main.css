@@ -61,8 +61,15 @@ body {
     line-height: 1.6;
 }
 
+.message.user {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    width: fit-content;
+}
+
 .message strong {
-    font-weight: 600;
+    display: none;
 }
 
 .message ul,
