@@ -1,3 +1,23 @@
+:root {
+    --bg: #f5f5f4;
+    --text: #111;
+    --text-muted: #666;
+    --user-bg: rgba(0, 0, 0, 0.05);
+    --input-bg: rgba(255, 255, 255, 0.7);
+    --input-border: rgba(0, 0, 0, 0.15);
+    --spinner-track: #ddd;
+}
+
+body.dark {
+    --bg: #111;
+    --text: #f5f5f4;
+    --text-muted: #999;
+    --user-bg: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-border: rgba(255, 255, 255, 0.2);
+    --spinner-track: #444;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,8 +26,8 @@
 
 body {
     font-family: system-ui, -apple-system, sans-serif;
-    background: #f5f5f4;
-    color: #111;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
 }
 
@@ -62,7 +82,7 @@ body {
 }
 
 .message.user {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--user-bg);
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
     width: fit-content;
@@ -102,7 +122,7 @@ body {
     width: 100%;
     max-width: 48rem;
     padding-bottom: 2rem;
-    background: linear-gradient(transparent, #f5f5f4 20%);
+    background: linear-gradient(transparent, var(--bg) 20%);
 }
 
 .container.empty .input-area {
@@ -113,10 +133,10 @@ body {
     display: flex;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--input-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--input-border);
     border-radius: 0.75rem;
 }
 
@@ -125,17 +145,17 @@ body {
     border: none;
     background: transparent;
     font-size: 1rem;
-    color: #111;
+    color: var(--text);
     outline: none;
 }
 
 .input-box input::placeholder {
-    color: #666;
+    color: var(--text-muted);
 }
 
 .input-box button {
-    background: #111;
-    color: #f5f5f4;
+    background: var(--text);
+    color: var(--bg);
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -158,17 +178,31 @@ body {
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.75rem;
-    color: #666;
+    color: var(--text-muted);
     font-size: 0.875rem;
 }
 
 .spinner {
     width: 1rem;
     height: 1rem;
-    border: 2px solid #ddd;
-    border-top-color: #111;
+    border: 2px solid var(--spinner-track);
+    border-top-color: var(--text);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: var(--user-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
 }
 
 @keyframes spin {

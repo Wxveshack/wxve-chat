@@ -152,6 +152,22 @@ fn App() -> impl IntoView {
     let (current_response, set_current_response) = create_signal(String::new());
     let (next_id, set_next_id) = create_signal(0usize);
     let (tool_running, set_tool_running) = create_signal::<Option<String>>(None);
+    let (dark_mode, set_dark_mode) = create_signal(false);
+
+    let toggle_dark_mode = move |_| {
+        let new_value = !dark_mode.get();
+        set_dark_mode.set(new_value);
+        if let Some(body) = web_sys::window()
+            .and_then(|w| w.document())
+            .and_then(|d| d.body())
+        {
+            if new_value {
+                let _ = body.class_list().add_1("dark");
+            } else {
+                let _ = body.class_list().remove_1("dark");
+            }
+        }
+    };
 
     let do_send = move || {
         let msg = input.get();
@@ -236,8 +252,18 @@ fn App() -> impl IntoView {
 
     let has_messages = move || !messages.get().is_empty() || !current_response.get().is_empty();
 
+    let container_class = move || {
+        if has_messages() { "container has-messages" } else { "container empty" }
+    };
+
     view! {
-        <div class=move || if has_messages() { "container has-messages" } else { "container empty" }>
+        <div class=container_class>
+            <button
+                class="theme-toggle"
+                on:click=toggle_dark_mode
+            >
+                {move || if dark_mode.get() { "☀️" } else { "🌙" }}
+            </button>
             <div class="logo">"wxve.io"</div>
 
             <div class="messages" node_ref=messages_container>
