@@ -88,9 +88,6 @@ body {
     width: fit-content;
 }
 
-.message strong {
-    display: none;
-}
 
 .message ul,
 .message ol {
