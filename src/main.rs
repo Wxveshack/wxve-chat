@@ -1,6 +1,6 @@
 use leptos::{
-    component, create_node_ref, create_signal, html, view, For, IntoView, SignalGet,
-    SignalSet, SignalUpdate, spawn_local, mount_to_body,
+    component, create_effect, create_signal, view, For, IntoView,
+    SignalGet, SignalSet, SignalUpdate, spawn_local, mount_to_body,
 };
 use pulldown_cmark::{html as md_html, Parser};
 use serde::{Deserialize, Serialize};
@@ -248,7 +248,18 @@ fn App() -> impl IntoView {
         });
     };
 
-    let messages_container = create_node_ref::<html::Div>();
+    // Auto-scroll to bottom when streaming content
+    create_effect(move |_| {
+        current_response.get();
+        messages.get();
+        if let Some(window) = web_sys::window() {
+            if let Some(document) = window.document() {
+                if let Some(element) = document.document_element() {
+                    window.scroll_to_with_x_and_y(0.0, element.scroll_height() as f64);
+                }
+            }
+        }
+    });
 
     let has_messages = move || !messages.get().is_empty() || !current_response.get().is_empty();
 
@@ -266,7 +277,7 @@ fn App() -> impl IntoView {
             </button>
             <div class="logo">"wxve.io"</div>
 
-            <div class="messages" node_ref=messages_container>
+            <div class="messages">
                 <For
                     each=move || messages.get()
                     key=|msg| msg.id
