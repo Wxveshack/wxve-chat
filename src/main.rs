@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
+use js_sys;
 
 // ----------------------------------------------------------------------------
 // Helpers
@@ -178,6 +179,27 @@ fn App() -> impl IntoView {
             }
         }
     };
+
+    // Sync theme to chart iframes
+    create_effect(move |_| {
+        let dark = dark_mode.get();
+        if let Some(document) = web_sys::window().and_then(|w| w.document()) {
+            if let Ok(iframes) = document.query_selector_all(".chart-container iframe") {
+                for i in 0..iframes.length() {
+                    if let Some(iframe) = iframes.get(i) {
+                        if let Some(iframe_el) = iframe.dyn_ref::<web_sys::HtmlIFrameElement>() {
+                            if let Some(content_window) = iframe_el.content_window() {
+                                let msg = js_sys::Object::new();
+                                let _ = js_sys::Reflect::set(&msg, &"type".into(), &"theme".into());
+                                let _ = js_sys::Reflect::set(&msg, &"dark".into(), &dark.into());
+                                let _ = content_window.post_message(&msg, "*");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
 
     let do_send = move || {
         let msg = input.get();
